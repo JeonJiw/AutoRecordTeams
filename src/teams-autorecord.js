@@ -3,8 +3,8 @@ const msal = require('msal');
 // Configuring MSAL with your client application credentials
 const config = {
     auth: {
-        clientId: 'v.phan545@mybvc.ca',
-        authority: 'https://login.microsoftonline.com/YOUR_TENANT_ID'
+        clientId: '61b9fdf3-f5ee-4c4d-90be-4231e3300933',
+        authority: 'https://login.microsoftonline.com/c2628eb9-57bf-48f2-b0e6-84319d472735'
     }
 };
 
@@ -33,7 +33,7 @@ async function getAllMeetings(accessToken) {
 // Defining the function to enable automatic recording for all meetings in the client's tenant
 
 async function enableAutoRecording(accessToken) {
-    const endpoint = 'https://graph.microsoft.com/beta/meetingsettings';
+    const endpoint = 'https://graph.microsoft.com/v1.0/meetingsettings';
 
     // Making the API call to enable automatic recording settings
     const response = await fetch(endpoint, {
