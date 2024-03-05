@@ -1,80 +1,109 @@
-const msal = require('msal');
+// Importing the necessary MSAL module
+import {
+  PublicClientApplication,
+  InteractionType,
+  InteractionStatus,
+} from "@azure/msal-browser";
 
-// Configuring MSAL with your client application credentials
-const config = {
-    auth: {
-        clientId: '61b9fdf3-f5ee-4c4d-90be-4231e3300933',
-        authority: 'https://login.microsoftonline.com/c2628eb9-57bf-48f2-b0e6-84319d472735'
-    }
+// MSAL configuration
+const msalConfig = {
+  auth: {
+    clientId: "your-client-id-here", // Update with your client ID
+    authority: "https://login.microsoftonline.com/your-tenant-id-here", // Update with your tenant ID
+    redirectUri: "your-redirect-uri-here", // Update with your redirect URI
+  },
+  cache: {
+    cacheLocation: "sessionStorage",
+    storeAuthStateInCookie: false,
+  },
 };
 
-// Creating a new MSAL client application
-const clientApp = new msal.PublicClientApplication(config);
+// Create an instance of PublicClientApplication
+const msalInstance = new PublicClientApplication(msalConfig);
 
-// Defining the function to fetch all meetings in the client's tenant
+// Authentication parameters
+const loginRequest = {
+  scopes: ["openid", "profile", "User.Read", "OnlineMeetings.ReadWrite"], // Add other required scopes here
+};
 
-async function getAllMeetings(accessToken) {
-    const endpoint = 'https://graph.microsoft.com/v1.0/me/events';
-
-    // Making the API call to fetch all meetings
-    const response = await fetch(endpoint, {
-        headers: {
-            'Authorization': `Bearer ${accessToken}`
-        }
-    });
-
-    // Parsing the JSON response
-    const data = await response.json();
-
-    // Returning the list of meetings
-    return data.value;
-}
-
-// Defining the function to enable automatic recording for all meetings in the client's tenant
-
-async function enableAutoRecording(accessToken) {
-    const endpoint = 'https://graph.microsoft.com/v1.0/meetingsettings';
-
-    // Making the API call to enable automatic recording settings
-    const response = await fetch(endpoint, {
-        method: 'PATCH',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            allowCloudRecording: true,
-            automaticRecordAllMeetings: true
-        })
-    });
-
-    // Parsing the JSON response
-    const data = await response.json();
-
-    // Returning the updated meeting settings
-    return data;
-}
-
-// Creating a main function to authenticate the user and use the above functions
-
-// Example usage
-
-async function main() {
-    try {
-        // Authenticate the user and obtain the access token
-        const authResponse = await clientApp.loginPopup();
-
-        // Fetch all meetings
-        const meetings = await getAllMeetings(authResponse.accessToken);
-
-        // Enable auto recording for all meetings
-        const updatedSettings = await enableAutoRecording(authResponse.accessToken);
-
-        // Print the updated meeting settings
-        console.log(updatedSettings);
-    } catch (error) {
-        console.log('An error occurred:', error);
+// Function to sign in the user and acquire tokens
+async function signIn() {
+  try {
+    // Attempt to acquire token silently
+    const silentResult = await msalInstance.acquireTokenSilent(loginRequest);
+    return silentResult.accessToken;
+  } catch (error) {
+    // If silent acquisition fails, use popup or redirect
+    if (error.name === "InteractionRequiredAuthError") {
+      try {
+        const popupResult = await msalInstance.loginPopup(loginRequest);
+        return popupResult.accessToken;
+      } catch (popupError) {
+        console.error(popupError);
+      }
+    } else {
+      console.error(error);
     }
+  }
 }
 
+// Function to fetch all meetings
+async function getAllMeetings(accessToken) {
+  const endpoint = "https://graph.microsoft.com/v1.0/me/events";
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    return data.value;
+  } catch (error) {
+    console.error("Failed to fetch meetings:", error);
+    throw error;
+  }
+}
+
+// Function to enable automatic recording for all meetings
+async function enableAutoRecording(accessToken) {
+  const endpoint = "https://graph.microsoft.com/v1.0/meetingsettings";
+  try {
+    const response = await fetch(endpoint, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        allowCloudRecording: true,
+        automaticRecordAllMeetings: true,
+      }),
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to update meeting settings:", error);
+    throw error;
+  }
+}
+
+// Main function to authenticate the user and perform API calls
+async function main() {
+  try {
+    // Sign in the user and get the access token
+    const accessToken = await signIn();
+
+    // Fetch all meetings
+    const meetings = await getAllMeetings(accessToken);
+    console.log("Meetings:", meetings);
+
+    // Enable auto recording for all meetings
+    const updatedSettings = await enableAutoRecording(accessToken);
+    console.log("Updated Settings:", updatedSettings);
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
+}
+
+// Call the main function
 main();
