@@ -1,31 +1,57 @@
+import React from "react";
+import Navbar from "react-bootstrap/Navbar";
+import'../styles/footer.css'
 
-
-import React from 'react';
-import Navbar from 'react-bootstrap/Navbar';
-
-import { useIsAuthenticated } from '@azure/msal-react';
-import { SignInButton } from './SignInButton';
-import { SignOutButton } from './SignOutButton';
+import { useIsAuthenticated } from "@azure/msal-react";
+import { SignInButton } from "./SignInButton";
+import { SignOutButton } from "./SignOutButton";
 
 export const PageLayout = (props) => {
-    const isAuthenticated = useIsAuthenticated();
+  const isAuthenticated = useIsAuthenticated();
 
-    return (
-        <>
-            <Navbar bg="primary" variant="dark" className="navbarStyle">
-                <a className="navbar-brand" href="/">
-                    AutoRecord Teams Application
-                </a>
-                <div className="collapse navbar-collapse justify-content-end">
-                    {isAuthenticated ? <SignOutButton /> : <SignInButton />}
-                </div>
-            </Navbar>
-            <h5>
-                <center>Welcome to the AutoRecord Teams Application - Group 6 Bow Valley College</center>
-            </h5>
-            <br />
-            <br />
-            {props.children}
-        </>
-    );
+  return (
+    <>
+      <Navbar style={{ backgroundColor: '#F2F2F2' }} variant="dark" className="navbarStyle">
+        <a className="navbar-brand" href="/">
+          <img
+            src="/res/logo1.png"
+            alt=""
+            height="60"
+            className="d-inline-block align-top"
+          />
+        </a>
+        <div className="collapse navbar-collapse justify-content-end">
+          {isAuthenticated ? <SignOutButton /> : <SignInButton />}
+        </div>
+      </Navbar>
+      {props.children}
+
+      <footer style={{ backgroundColor: '#F2F2F2' }} variant="dark" className="navbarStyle">
+        Bow Valley College - Software Development Diploma Project. Developed By{' '}
+        <ul>
+          <li>
+            <a href="https://github.com/JhenyfferCristo" target="_blank" rel="noopener noreferrer">
+             Jhenyffer
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/JeonJiw" target="_blank" rel="noopener noreferrer">
+              Jiwon
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/vergilht" target="_blank" rel="noopener noreferrer">
+              Vergil
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/Chris-J-Thib" target="_blank" rel="noopener noreferrer">
+              Chris
+            </a>
+          </li>
+        </ul>
+      </footer>
+    </>
+    
+  );
 };

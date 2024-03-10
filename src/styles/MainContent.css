@@ -1,0 +1,38 @@
+.mainContent {
+  flex:1;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mainContentWrapper{
+  display:flex;
+  flex:1;
+}
+.welcome {
+  width: 45%;
+  text-align: center;
+}
+.welcomePicture {
+  width: 45%;
+  text-align: center;
+}
+h3 {
+  color: #0d0d0d;
+  font-size: 2em;
+  padding: 20px;
+}
+
+p {
+  color: #666;
+  text-align: justify;
+  margin: 0 auto;
+  max-width: 80%;
+}
+
+.welcomePicture img {
+  height: 70%;
+  width: 80%;
+  border-radius: 8px;
+}
