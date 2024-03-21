@@ -13,10 +13,10 @@
         "web-vitals": "^2.1.4"
     },
     "devDependencies": {
-        "react-scripts": "5.0.1",
-        "prettier": "^3.2.5"
+        "prettier": "^3.2.5",
+        "react-scripts": "5.0.1"
     },
-        "scripts": {
+    "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",

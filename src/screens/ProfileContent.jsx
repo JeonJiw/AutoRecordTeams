@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { loginRequest } from "../authConfig";
-import { callMsGraph } from "../graph";
+import { callMsGraph, getEvents } from "../graph";
 import { ProfileData } from "../components/ProfileData";
-import { createOrUpdateMeetingWithAutoRecording } from "../graph";
 import { useMsal } from "@azure/msal-react";
 import Button from "react-bootstrap/Button";
 import "../styles/App.css";
@@ -32,9 +31,9 @@ export const ProfileContent = () => {
         account: accounts[0],
       })
       .then((response) => {
-        createOrUpdateMeetingWithAutoRecording(response.accessToken).then(
+        getEvents(response.accessToken).then(
           (meetingData) => {
-            console.log("Meeting Created with Auto-Recording:", meetingData);
+            console.log("List of all meeting ids:", meetingData);
             // Handle meeting data here (e.g., display a message or update the UI)
           }
         );

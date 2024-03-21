@@ -38,7 +38,11 @@ export const msalConfig = {
 };
 
 export const loginRequest = {
-    scopes: ["User.Read"]
+    scopes: [
+        "User.Read",
+        "Calendars.Read",
+        "OnlineMeetings.ReadWrite"
+            ]
 };
 
 export const graphConfig = {

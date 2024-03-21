@@ -20,6 +20,32 @@ export async function callMsGraph(accessToken) {
         .catch(error => console.log(error));
 }
 
+export async function getEvents(accessToken){
+    const headers = new Headers();
+    const bearer = `Bearer ${accessToken}`;
+    let meetings = []
+    let ids = []
+    
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-Type", "application/json");
+
+    const options = {
+        method: "GET",
+        headers: headers
+    };
+
+    await fetch("https://graph.microsoft.com/v1.0/me/calendar/events", options)
+        .then(response => response.json())
+        .then(ret => Array.from(ret.value).forEach(event =>{ if(event.isOnlineMeeting) meetings.push(event.onlineMeeting.joinUrl)}))
+        .catch(error => console.log(error))
+
+    await meetings.forEach(m=>fetch("https://graph.microsoft.com/v1.0/me/onlineMeetings?$filter=JoinWebUrl%20eq%20'"+m+"'",options)
+                    .then(res => res.json())
+                    .then(data => ids.push(data.value[0].id)))
+        return ids
+}
+/*  We dont want to create a new meeting. just modify old ones
 export async function createOrUpdateMeetingWithAutoRecording(accessToken) {
     const headers = new Headers();
     const bearer = `Bearer ${accessToken}`;
@@ -42,4 +68,4 @@ export async function createOrUpdateMeetingWithAutoRecording(accessToken) {
         .then(response => response.json())
         .catch(error => console.log(error));
 }
-
+*/
