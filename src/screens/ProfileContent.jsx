@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { loginRequest } from "../authConfig";
-import { callMsGraph } from "../graph";
+import { callMsGraph, getEvents, workingHours } from "../graph";
 import { ProfileData } from "../components/ProfileData";
 import { createOrUpdateMeetingWithAutoRecording } from "../graph";
 import { useMsal } from "@azure/msal-react";
 import Button from "react-bootstrap/Button";
 import "../styles/App.css";
+import { Spinner } from "../components/Spinner";
 
 export const ProfileContent = () => {
   const { instance, accounts } = useMsal();
   const [graphData, setGraphData] = useState(null);
+  const [filterWorkingHours, setFilterWorkingHours] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   function RequestProfileData() {
     // Silently acquires an access token which is then attached to a request for MS Graph data
@@ -25,36 +28,59 @@ export const ProfileContent = () => {
       });
   }
 
-  function EnableAutoRecording() {
-    instance
-      .acquireTokenSilent({
+  async function EnableAutoRecording() {
+    setLoading(true);
+    try {
+      const tokenResponse = await instance.acquireTokenSilent({
         ...loginRequest,
         account: accounts[0],
-      })
-      .then((response) => {
-        createOrUpdateMeetingWithAutoRecording(response.accessToken).then(
-          (meetingData) => {
-            console.log("Meeting Created with Auto-Recording:", meetingData);
-            // Handle meeting data here (e.g., display a message or update the UI)
-          }
-        );
       });
+
+      const eventsResponse = await getEvents(
+        tokenResponse.accessToken,
+        filterWorkingHours
+      );
+
+      console.log("List of filtered meeting ids:", eventsResponse);
+      // Handle meeting data here (e.g., display a message or update the UI)
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <section className="profilePage">
       <h5 className="card-title">Welcome {accounts[0]?.name}</h5>
-      <div>
+      <div className="buttonsWrapper">
         <Button variant="secondary" onClick={RequestProfileData}>
           Request Profile Information
         </Button>
-        <Button
-          variant="primary"
-          onClick={EnableAutoRecording}
-          style={{ marginLeft: "10px" }}
-        >
-          Enable Auto-Recording
-        </Button>
+        <div className="autoRecordingSection">
+          <div className="form-check form-switch">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="businessHours"
+              checked={filterWorkingHours}
+              onChange={() =>
+                setFilterWorkingHours((currentState) => !currentState)
+              }
+            />
+            <label className="form-check-label" htmlFor="businessHours">
+              Between business hours ({workingHours.start} - {workingHours.end})
+            </label>
+          </div>
+          <Button
+            variant="primary"
+            onClick={EnableAutoRecording}
+            disabled={isLoading}
+          >
+            {isLoading ? <Spinner /> : "Enable Auto-Recording"}
+          </Button>
+        </div>
       </div>
 
       {graphData && <ProfileData graphData={graphData} />}
