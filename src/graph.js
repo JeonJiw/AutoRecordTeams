@@ -49,12 +49,13 @@ export async function getEvents(
       Array.from(ret.value).forEach((event) => {
         if (event.isOnlineMeeting) {
           const joinUrl = event.onlineMeeting.joinUrl;
+
           if (filterWorkingHours && filterPrivate) {
             if (
               isBetweenWorkingHours(
-                `${event.start.dateTime}${utcIdentifier}` &&
-                  event.sensitivity != "private"
-              )
+                `${event.start.dateTime}${utcIdentifier}`
+              ) &&
+              event.sensitivity != "private"
             ) {
               meetings.push(joinUrl);
             }
