@@ -12,7 +12,7 @@ export const ProfileContent = () => {
   const { instance, accounts } = useMsal();
   const [graphData, setGraphData] = useState(null);
   const [filterWorkingHours, setFilterWorkingHours] = useState(false);
-  const [filterPrivate, setFilterPrivate] = useState(true);
+  const [filterPrivate, setFilterPrivate] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
   function RequestProfileData() {
@@ -85,7 +85,7 @@ export const ProfileContent = () => {
               onChange={() => setFilterPrivate((currentState) => !currentState)}
             />
             <label className="form-check-label" htmlFor="private">
-              Private Meetings
+              Public Meetings Only
             </label>
           </div>
           <Button

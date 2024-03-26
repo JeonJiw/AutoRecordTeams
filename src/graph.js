@@ -25,7 +25,11 @@ export async function callMsGraph(accessToken) {
     .catch((error) => console.log(error));
 }
 
-export async function getEvents(accessToken, filterWorkingHours) {
+export async function getEvents(
+  accessToken,
+  filterWorkingHours,
+  filterPrivate
+) {
   const headers = new Headers();
   const bearer = `Bearer ${accessToken}`;
   let meetings = [];
@@ -45,10 +49,23 @@ export async function getEvents(accessToken, filterWorkingHours) {
       Array.from(ret.value).forEach((event) => {
         if (event.isOnlineMeeting) {
           const joinUrl = event.onlineMeeting.joinUrl;
-          if (filterWorkingHours) {
+          if (filterWorkingHours && filterPrivate) {
+            if (
+              isBetweenWorkingHours(
+                `${event.start.dateTime}${utcIdentifier}` &&
+                  event.sensitivity != "private"
+              )
+            ) {
+              meetings.push(joinUrl);
+            }
+          } else if (filterWorkingHours && !filterPrivate) {
             if (
               isBetweenWorkingHours(`${event.start.dateTime}${utcIdentifier}`)
             ) {
+              meetings.push(joinUrl);
+            }
+          } else if (!filterWorkingHours && filterPrivate) {
+            if (event.sensitivity != "private") {
               meetings.push(joinUrl);
             }
           } else {
