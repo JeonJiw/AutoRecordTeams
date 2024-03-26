@@ -12,6 +12,7 @@ export const ProfileContent = () => {
   const { instance, accounts } = useMsal();
   const [graphData, setGraphData] = useState(null);
   const [filterWorkingHours, setFilterWorkingHours] = useState(false);
+  const [filterPrivate, setFilterPrivate] = useState(true);
   const [isLoading, setLoading] = useState(false);
 
   function RequestProfileData() {
@@ -38,7 +39,8 @@ export const ProfileContent = () => {
 
       const eventsResponse = await getEvents(
         tokenResponse.accessToken,
-        filterWorkingHours
+        filterWorkingHours,
+        filterPrivate
       );
 
       console.log("List of filtered meeting ids:", eventsResponse);
@@ -71,6 +73,19 @@ export const ProfileContent = () => {
             />
             <label className="form-check-label" htmlFor="businessHours">
               Between business hours ({workingHours.start} - {workingHours.end})
+            </label>
+          </div>
+          <div className="form-check form-switch">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="private"
+              checked={filterPrivate}
+              onChange={() => setFilterPrivate((currentState) => !currentState)}
+            />
+            <label className="form-check-label" htmlFor="private">
+              Private Meetings
             </label>
           </div>
           <Button
