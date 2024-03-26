@@ -2,48 +2,65 @@ import { graphConfig } from "./authConfig";
 
 /**
  * Attaches a given access token to a MS Graph API call. Returns information about the user
- * @param accessToken 
+ * @param accessToken
  */
 export async function callMsGraph(accessToken) {
-    const headers = new Headers();
-    const bearer = `Bearer ${accessToken}`;
+  const headers = new Headers();
+  const bearer = `Bearer ${accessToken}`;
 
-    headers.append("Authorization", bearer);
+  headers.append("Authorization", bearer);
 
-    const options = {
-        method: "GET",
-        headers: headers
-    };
+  const options = {
+    method: "GET",
+    headers: headers,
+  };
 
-    return fetch(graphConfig.graphMeEndpoint, options)
-        .then(response => response.json())
-        .catch(error => console.log(error));
+  return fetch(graphConfig.graphMeEndpoint, options)
+    .then((response) => response.json())
+    .catch((error) => console.log(error));
 }
 
-export async function getEvents(accessToken){
-    const headers = new Headers();
-    const bearer = `Bearer ${accessToken}`;
-    let meetings = []
-    let ids = []
-    
+export async function getEvents(accessToken) {
+  const headers = new Headers();
+  const bearer = `Bearer ${accessToken}`;
+  let meetings = [];
+  let ids = [];
 
-    headers.append("Authorization", bearer);
-    headers.append("Content-Type", "application/json");
+  headers.append("Authorization", bearer);
+  headers.append("Content-Type", "application/json");
 
-    const options = {
-        method: "GET",
-        headers: headers
-    };
+  const options = {
+    method: "GET",
+    headers: headers,
+    recordAutomatically: false,
+  };
 
-    await fetch("https://graph.microsoft.com/v1.0/me/calendar/events", options)
-        .then(response => response.json())
-        .then(ret => Array.from(ret.value).forEach(event =>{ if(event.isOnlineMeeting) meetings.push(event.onlineMeeting.joinUrl)}))
-        .catch(error => console.log(error))
+  await fetch("https://graph.microsoft.com/v1.0/me/calendar/events", options)
+    .then((response) => response.json())
+    .then((ret) =>
+      Array.from(ret.value).forEach((event) => {
+        if (event.isOnlineMeeting) meetings.push(event.onlineMeeting.joinUrl);
+      })
+    )
+    .catch((error) => console.log(error));
 
-    await meetings.forEach(m=>fetch("https://graph.microsoft.com/v1.0/me/onlineMeetings?$filter=JoinWebUrl%20eq%20'"+m+"'",options)
-                    .then(res => res.json())
-                    .then(data => ids.push(data.value[0].id)))
-        return ids
+  await meetings.forEach((m) =>
+    fetch(
+      "https://graph.microsoft.com/v1.0/me/onlineMeetings?$filter=JoinWebUrl%20eq%20'" +
+        m +
+        "'",
+      options
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.value[0].recordAutomatically) {
+          ids.push(data.value[0].id);
+        }
+      })
+  );
+
+  console.log("all:", ids);
+  return ids;
 }
 /*  We dont want to create a new meeting. just modify old ones
 export async function createOrUpdateMeetingWithAutoRecording(accessToken) {
